@@ -12,7 +12,7 @@ class FuzzySystem:
     def get_result_by_first(self, coefIn: List[float], agg_type='output', impl='mamdani') -> List[float] | None:
         LogsWork.add_impl_method(impl)
         LogsWork.add_agg_method(agg_type)
-        LogsWork.add_rule(self.rules)
+        LogsWork.add_rule_by_first(self.rules)
         LogsWork.add_input_data_by_first(coefIn)
         R = []
         for i in range(len(self.rules.coefs_b)):
@@ -23,21 +23,26 @@ class FuzzySystem:
             for r in R:
                 B.append(self.maxmin([coefIn], r))
             LogsWork.add_B(B)
-            LogsWork.add_result(self.aggMax(B))
-            return self.aggMax(B)
+            result = [[round(i, 2) for i in self.aggMax(B)[0]]]
+            LogsWork.add_result(result)
+            return result
         else:
             aggR = self.aggMax(R)
             LogsWork.add_Ri(aggR)
-            LogsWork.add_result(self.maxmin([coefIn], aggR))
-            return self.maxmin([coefIn], aggR)
+            result = [[round(i, 2) for i in self.maxmin([coefIn], aggR)[0]]]
+            LogsWork.add_result(result)
+            return result
 
     def get_result_by_second(self, coefIn: List[List[float]]):
         LogsWork.add_rule(self.rules)
+        LogsWork.add_input_data_by_second(coefIn)
         alphas = self.firing_level(coefIn)
         Bi = []
         for i in range(len(self.rules.coefs_b)):
             Bi.append([self.minAlphaB(alphas[i], self.rules.coefs_b[i].coefs)])
+        LogsWork.add_Bi(Bi)
         result = self.aggMax(Bi)
+        LogsWork.add_result(result)
         print(self.defuzzification(result[0]))
         return result
 
@@ -48,6 +53,7 @@ class FuzzySystem:
         result = []
         for item in maxmins:
             result.append(min([i if i is not None else 0 for i in item]))
+        LogsWork.add_alpha(result)
         return result
 
     def impl(self, A: List[float], B: List[float], type_impl="mamdani") -> List[List[float]]:

@@ -12,6 +12,7 @@ class RequestByFirst(BaseModel):
     values: List[float]
     impl_method: str | None = None
     agg_method: str | None = None
+    punkt: int | None = None
 
 
 class RequestBySecond(BaseModel):
@@ -19,33 +20,36 @@ class RequestBySecond(BaseModel):
 
 app = FastAPI()
 
-@app.get('/')
-def test():
-    return {"hello": "world"}
-
 @app.post('/byFirst')
 def get_result_by_first(request: RequestByFirst):
-    rules = parse_rules('rules_test.txt')
+    rules = parse_rules('rules1.txt')
     fuzzy = FuzzySystem(rules)
     result = fuzzy.get_result_by_first(request.values, impl=request.impl_method, agg_type=request.agg_method)
-    LogsWork.write_in_file('result1.txt')
+    LogsWork.write_in_file('results/result1.txt')
+    LogsWork.log_text = ''
     return {
         'result': result[0],
     }
 
 @app.post('/bySecond')
 def get_result_by_second(request: RequestBySecond):
-    rules = parse_rules('rules_test2.txt')
+    rules = parse_rules('rules2.txt')
+    print(request.values)
     fuzzy = FuzzySystem(rules)
     result = fuzzy.get_result_by_second(request.values)
-    LogsWork.write_in_file('result2.txt')
+    LogsWork.write_in_file('results/result2.txt')
+    LogsWork.log_text = ''
     return {
         'result': result[0],
     }
 
 @app.post('/defuz')
 def defuz(request: RequestByFirst):
-    rules = parse_rules('rules_test.txt')
+    rules = None
+    if (request.punkt == 1):
+        rules = parse_rules('rules1.txt')
+    else:
+        rules = parse_rules('rules2.txt')
     fuzzy = FuzzySystem(rules)
     return {
         "result": fuzzy.defuzzification(request.values),

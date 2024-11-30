@@ -13,4 +13,5 @@ class CoefDto:
         return f"title: {self.title}, name: {self.name}, coefs: {self.coefs}"
 
     def text(self, value: ValueDto) -> str:
-        return f"{value.name} - {self.name}\n\t{self.title} = {' + '.join([f"{value.values[i]}/{self.coefs[i]}" for i in range(len(self.coefs))])}"
+        fuzzy_set = ' + '.join([f"{value.values[i]}/{self.coefs[i]}" for i in range(len(self.coefs))])
+        return f"{value.name} - {self.name}\n\t{self.title} = {fuzzy_set}"
